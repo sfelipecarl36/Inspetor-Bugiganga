@@ -1,0 +1,965 @@
+package Exercicios;
+
+import java.util.Scanner;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class Jogo {    
+
+static Scanner leia = new Scanner(System.in);
+static Random randi = new Random();
+static Timer timer = new Timer();
+
+static int inventario[] = new int[8];
+static int zona[][] = new int[6+1][5+1];
+static int zonaitem[][] = new int[6+1][5+1];
+static String mapa[][] = new String[6+1][5+1];
+static String mapaitem[] = new String[4+5];
+static String mapainimigo[] = new String[4];
+static String tipoinimigo[] = new String[4];
+static String inimigoAtaque[] = new String[8];
+static int opcaoMenuPrincipal;
+static int opcaoMenu;
+static int posicao[] = new int[2];
+static int montarMapa[] = new int[1];
+static int randTipoInimigo;
+static int randInimigoAtaque = 0;
+static int randItem;
+static int vidaGarra;
+static int i;
+
+// 1 - Colete a Prova de Balas
+// 2 - Jato d'água
+// 3 - Abafadores Sonoros
+// 4 - Chapéu Bugiganga
+// 5 - Óculos Escuro
+// 6 - Lupa
+// 7 - Lanterna
+// 8 - Pistola
+
+static void creditos() {
+
+for (int i = 0; i < 17; ++i) System.out.println ();
+System.out.println();
+System.out.println(" Jogo desenvolvido pela Equipe TeamPanzé, cujos membros são");
+System.out.println(" alunos da Instituição de Ensino FAPAN");
+System.out.println(" Membros: Ivo Miranda & Felipe Carlos");
+System.out.println();
+miniMenu();
+}
+
+static void sair() {
+
+for (int i = 0; i < 18; ++i) System.out.println ();
+System.out.println();
+System.out.println();
+System.out.println();
+System.out.println();
+System.out.println("                 Obrigado por jogar nosso Game!!!");
+System.out.println();
+System.out.println();
+System.out.println();
+System.out.println();
+System.out.println();
+System.out.println();
+System.out.println();
+System.out.println();
+System.out.println();
+reset();
+System.exit(0);
+}
+
+public static void instrucoes() {
+
+for (int i = 0; i < 15; ++i) System.out.println ();
+System.out.println();
+System.out.println(" - Você como Inspetor Bugiganga, pode caminhar pela Cidade ");
+System.out.println(" Utilize os numeradores 1, 2, 3 e 4 para determinar a direção ");
+System.out.println(" o qual irá seguir ");
+System.out.println(" - Haverá vários obstáculos e inimigos durante sua jornada ");
+System.out.println(" Sua lista de itens e utilitários ajudarão a derrotar quem ");
+System.out.println(" o confronte, e a superar desafios. ");
+System.out.println(" - Seu objetivo final é descobrir o responsável pelo ");
+System.out.println(" caos na cidade e restaurar a paz na mesma. ");
+System.out.println();
+miniMenu();
+}
+
+public static void miniMenu()     // MINI M E N U;
+{
+System.out.println();
+System.out.println("                   (1) Voltar ao Menu Principal");
+System.out.println("                   (2) Sair do Jogo");
+System.out.println();
+System.out.print("                          Comando: ");
+opcaoMenu = leia.nextInt();
+System.out.println();
+switch (opcaoMenu) {
+case 1:
+for (int i = 0; i < 15; ++i) System.out.println ();
+menu();
+break;
+case 2:
+sair();
+break;
+default:
+System.out.println("Digite uma opção válida!");
+miniMenu();
+break;
+}
+}
+
+
+public static void  jogo() {
+
+for (int i = 0; i < 15; ++i) System.out.println();    
+int vidas = 0, i = 0;
+reset();
+posicao[0] = 6;    // Posição inicial Eixo X
+posicao[1] = 3;    // Posição inicial Eixo Y
+inventario[0] = 1;
+inventario[1] = 3;
+inventario[2] = 4;
+inventario[3] = 1;
+inventario[4] = 0;
+inventario[5] = 0;
+inventario[6] = 0;
+inventario[7] = 0;
+mostraposicao();
+}
+
+public static void  reset() {
+zona[2][2] = 1;
+zona[2][3] = 1;
+zona[2][4] = 1;
+zona[3][1] = 1;
+zona[3][3] = 1;           //INIMIGOS NO MAPA
+zona[3][5] = 1;
+zona[4][2] = 1;
+zona[4][3] = 1;
+zona[5][2] = 1;
+zona[6][1] = 1;
+zona[6][4] = 1;
+zona[1][1] = 3;
+zona[1][2] = 3;
+zona[1][3] = 3;
+zona[1][4] = 3;
+zona[1][5] = 3;
+
+zonaitem[6][5] = 1;
+zonaitem[6][2] = 1;
+zonaitem[4][1] = 1;           //ITENS NO MAPA
+zonaitem[3][4] = 1;
+zonaitem[4][3] = 1;
+zonaitem[5][4] = 1;
+
+// Descrição dos pontos do Mapa (NARRATIVA)
+
+mapa[6][1] = " Garagem da sua Central de Operações Bugiganga, os veículos  \n usados contra o Sobrinho de um certo alguém estão aqui.";
+mapa[6][2] = " Você está na sua Sede de Operações Bugiganga, aqui há armas \n Lasers Bugiganga, Protocólos Bugiganga de Defesa e Ataque, \n porém nenhum recurso está disponível, \n há suspeita que a Central de Comunicações está danificada.";
+mapa[6][3] = " Você Inspetor Bugiganga, está detectando um crescimento\n descontrolado da criminalidade, sua missão \n é desvender o motivo por trás desse ocorrido, e combater \n o crime na cidade com suas Bugigangas. \n Digite qual direção inicial você irá embarcar nessa aventura:";
+mapa[6][4] = " Neste ponto há um beco vizinho a sua casa Bugiganga, e diversas \n lembranças com sua sobrinha Penny, antes da sua operação médica,\n que o tornou o que você é.";
+mapa[6][5] = " Está no final do seu bairro, bem longe do perigo, porém distante \n da Torre de Vigilância a frente da sua casa.";
+mapa[5][1] = " Há destroços espalhados por aqui, muito semelhante a Estragos \n feitos por seu Antagonista Principal, nesse ponto \n não dá para duvidar de mais nada.";
+mapa[5][2] = " Ponto de Ônibus no local, ainda com bastante criminosos a \n frente, talvez seja bom se preparar \n para Combater alguns.";
+mapa[5][3] = " Daqui é possível ver muito a frente uma torre de vigilância \n a qual não estava ali antes, talvez seja uma base \n de criminosos comandada por uma força maior,\n além disso a apenas alguns metros de você há um grupo de Foras da Lei, cuidado.";
+mapa[5][4] = " Aqui parece ser o Lugar que você escorregou n'uma banana, e \n por conta disso, teve o corpo reconstruído de Bugigangas.\n Você está próximo de um grupo nesse momento.";
+mapa[5][5] = " Há uma Delegacia da polícia a sua frente, é justo a qual você \n trabalhava inicialmente, siga em FRENTE";
+mapa[4][1] = " Seu objetivo está cada vez mais próximo, o cuidado para usar a \n melhor estratégia em combate ainda é válida.";
+mapa[4][2] = " Aqui pelo jeito, é a região de maior concentração dos crimes \n de horda desses criminosos, justo o centro da cidade...";
+mapa[4][3] = " Está no principal atrativo da cidade, ponto com uma praça e \n diversas bancas com lanchonetes e sorveterias diversas.";
+mapa[4][4] = " Aqui pelo jeito, é a região de maior concentração dos crimes \n de horda desses criminosos, justo o centro da cidade...";
+mapa[4][5] = " É possível ver uma ponte daqui,";
+mapa[3][1] = " Você está no início do jogo";
+mapa[3][2] = " Você está no início do jogo";
+mapa[3][3] = " Você está no início do jogo";
+mapa[3][4] = " Você está no início do jogo";
+mapa[3][5] = " Você está no início do jogo";
+mapa[2][1] = " Você está no início do jogo";
+mapa[2][2] = " Você está no início do jogo";
+mapa[2][3] = " Você está no início do jogo";
+mapa[2][4] = " Você está no início do jogo";
+mapa[2][5] = " Você está no início do jogo";
+mapa[1][1] = " Você finalmente derrotou o Dr. Garra, livrando assim a cidade \n do caos criminoso e restabelecendo a ordem na mesma,\n PARABÉNS pela finalizanção da trama do inspetor bugiganga!";
+mapa[1][2] = " Você finalmente derrotou o Dr. Garra, livrando assim a cidade \n do caos criminoso e restabelecendo a ordem na mesma,\n PARABÉNS pela finalizanção da trama do inspetor bugiganga!";
+mapa[1][3] = " Você finalmente derrotou o Dr. Garra, livrando assim a cidade \n do caos criminoso e restabelecendo a ordem na mesma,\n PARABÉNS pela finalizanção da trama do inspetor bugiganga!";
+mapa[1][4] = " Você finalmente derrotou o Dr. Garra, livrando assim a cidade \n do caos criminoso e restabelecendo a ordem na mesma,\n PARABÉNS pela finalizanção da trama do inspetor bugiganga!";
+mapa[1][5] = " Você finalmente derrotou o Dr. Garra, livrando assim a cidade \n do caos criminoso e restabelecendo a ordem na mesma,\n PARABÉNS pela finalizanção da trama do inspetor bugiganga!";
+
+mapaitem[5] = "               Você encontrou um Óculos Escuro";
+mapaitem[6] = "                   Você encontrou uma Lupa";
+mapaitem[7] = "                 Você encontrou uma Lanterna";
+mapaitem[8] = "                 Você encontrou uma Pistola";
+
+// Tipos de Inimigos
+
+tipoinimigo[0] = "Crimioso";
+tipoinimigo[1] = "Chefe do Crime";
+tipoinimigo[2] = "Cafetão";
+tipoinimigo[3] = "Bandido";
+
+// Variações de ataques dos Inimigos
+
+inimigoAtaque[0] = " ele está Sacando uma pistola e preparando \n para atirar em sua direção";
+inimigoAtaque[1] = " ele pegou um lança-chamas e está acionando a \narma pra queima-lo";
+inimigoAtaque[2] = " Com uma roupa tecnológica, a qual emite ondas \nsonoras de alta frequência, danificando a audição do seu alvo, ele está em prontidão para efetuar esse ataque contra você!";
+inimigoAtaque[3] = " almejando o Combate corpo a corpo, indo em sua \ndireção na maior velocidade possível";
+inimigoAtaque[4] = " o qual está pegando uma Lanterna na tentativa de \ndispersar sua visão";
+inimigoAtaque[5] = " ele está sobrevoando os céus com um helicóptero \nde combate, manejando o mesmo para iniciar um ataque sobre você";
+inimigoAtaque[6] = " emitindo um raio ultravioleta de altíssima intensidade \npara disparar na sua direção";
+inimigoAtaque[7] = " empunhando uma faca para lhe acertar";
+
+vidaGarra = 3; // HP do Chefão ( Dr. Garra )
+
+}
+
+public static void menu(){
+
+    Scanner opcaoMenuP = new Scanner(System.in);
+    int opcaoMenuPrincipal;
+
+    System.out.println("                           CARREGANDO...\n");
+    System.out.println("----------------------------------------------------------------");
+    System.out.println("  ___   _   _   ____    ____    _____   _____    ___    ____    ");
+    System.out.println(" |_ _| | \\ | | / ___|  |  _ \\  | ____| |_   _|  / _ \\  |  _ \\   ");
+    System.out.println("  | |  |  \\| | \\___ \\  | |_) | |  _|     | |   | | | | | |_) |  ");
+    System.out.println("  | |  | |\\  |  ___) | |  __/  | |___    | |   | |_| | |  _ <   ");
+    System.out.println(" |___| |_| \\_| |____/  |_|     |_____|   |_|    \\___/  |_| \\_\\  ");
+    System.out.println("     ___   _   _   ___  ___   ___    _    _  _   ___    _    ");
+    System.out.println("    | _ ) | | | | / __||_ _| / __|  /_\\  | \\| | / __|  /_\\   ");
+    System.out.println("    | _ \\ | |_| || (_ | | | | (_ | / _ \\ | .` || (_ | / _ \\  ");
+    System.out.println("    |___/  \\___/  \\___||___| \\___|/_/ \\_\\|_|\\_| \\___|/_/ \\_\\ ");
+    System.out.println("\n");
+    System.out.println("                         Menu do Jogo" + "\n");
+    System.out.println("                      (1) Iniciar Jogo");
+    System.out.println("                      (2) Ver Instruções");
+    System.out.println("                      (3) Créditos");
+    System.out.println("                      (4) Sair do Jogo");
+    System.out.println("----------------------------------------------------------------");
+    System.out.print("                          Comando: ");
+   
+    opcaoMenuPrincipal = opcaoMenuP.nextInt();
+    
+   switch (opcaoMenuPrincipal) {
+   case 1:
+      jogo();
+              break;
+   case 2:
+      instrucoes();
+              break;
+   case 3:
+      creditos();
+              break;
+   case 4:
+      sair();
+              break;
+   default:
+      for (int i = 0; i < 15; ++i) System.out.println ();
+       System.out.println("                   Digite uma opção válida!");
+      
+      menu();
+              break;
+              }
+    
+}
+
+static void mostraposicao() {
+    randItem = randi.nextInt(4);
+if (zona[posicao[0]][posicao[1]]==0)  {
+   if (vidaGarra != 0) {
+      System.out.println();
+      System.out.println();
+      System.out.println();
+      System.out.println(mapa[posicao[0]][posicao[1]]);
+      comandoposicao();
+      }
+   else {
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println(" Você finalmente derrotou o Dr. Garra, livrando assim a cidade do caos criminoso e restabelecendo a ordem na mesma, PARABÉNS pela finalizanção da trama do inspetor bugiganga!"); 
+      sair();
+   }
+}
+else {
+   System.out.println(mapainimigo[randTipoInimigo]+tipoinimigo[randTipoInimigo]+inimigoAtaque[randInimigoAtaque]+", qual sua próxima ação Inspetor Bugiganga?");
+   comandoataque();
+}
+}
+
+public static void mudainimigo() {
+
+    if (posicao[0]!=1) {
+   randTipoInimigo = randi.nextInt(4);
+   randInimigoAtaque = randi.nextInt(8);
+
+   mapainimigo[0] = " Opa, você esbarrou em um ";
+   mapainimigo[1] = " Você encontrou de cara mais um ";
+   mapainimigo[2] = " Há um ";
+   mapainimigo[3] = " Você deu de frente com um ";
+    }
+    else{
+   randTipoInimigo = randi.nextInt(4);
+   randInimigoAtaque = randi.nextInt(8);
+
+   tipoinimigo[0] = "Garra";
+   tipoinimigo[1] = "Garra";
+   tipoinimigo[2] = "Garra";
+   tipoinimigo[3] = "Garra";
+   mapainimigo[0] = " O Dr. ";
+   mapainimigo[1] = " O Dr. ";
+   mapainimigo[2] = " O Dr. ";
+   mapainimigo[3] = " O Dr. ";
+}
+}
+
+public static void comandoataque()    // Exibe os Comandos de Ataque ou Ação;
+{
+int opcaoAtaque;
+
+System.out.println();
+System.out.println("Você tem:");
+System.out.println();
+if (inventario[0]>0) {
+   System.out.println("1 - Colete a Prova de Balas");
+}
+if (inventario[1]>0) {
+   System.out.println("2 - Jato d'água");
+}
+if (inventario[2]>0) {
+   System.out.println("3 - Abafadores Sonoros");
+}
+if (inventario[3]>0) {
+   System.out.println("4 - Chapéu Bugiganga");
+}
+if (inventario[4]>0) {
+   System.out.println("5 - Óculos Escuro");
+}
+if (inventario[5]>0) {
+   System.out.println("6 - Lupa");
+}
+if (inventario[6]>0) {
+   System.out.println("7 - Lanterna");
+}
+if (inventario[7]>0) {
+   System.out.println("8 - Pistola");
+}
+//  LEITURA DO ATAQUE
+System.out.println();
+System.out.println("     .-.________");
+System.out.println("----/ \\ )_______)"); 
+System.out.println("   (  (/()___)");
+System.out.println("        ()__)");
+System.out.println("----\\___()_)");
+System.out.print("Comando: ");
+opcaoAtaque = leia.nextInt();
+
+switch (opcaoAtaque)    // ATAQUE X DEFESA
+{
+case 1:
+   if (inventario[0]>0) {     
+
+      switch (randInimigoAtaque) {
+      case 0:
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;
+         }
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[0] = inventario[0]-1;
+         System.out.println(" Você se defendeu dos tiros do "+tipoinimigo[randTipoInimigo]+" logo você o derrotou");         
+         mostraposicao();
+      
+      default:
+         for (int i = 0; i < 15; ++i) System.out.println ();
+         System.out.println("Essa bugiganga não defendeu o ataque inimigo, você foi derrotado!");
+         
+         for (int i = 0; i < 15; ++i) System.out.println ();
+        
+         menu();
+      }
+   }
+   
+      else {
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println("Digite um item disponível da lista");
+      System.out.println();
+      mostraposicao();
+      comandoataque();
+   }
+case 2:
+   if (inventario[1]>0) {
+
+      switch (randInimigoAtaque) {
+      case 1:
+         // Se ataque do inimigo for Lança-Chamas, então...;
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;
+   }
+   
+   
+   else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[1] = inventario[1]-1;
+         System.out.println(" O Jato de Água anulou o fogo inimigo e você utilizou outro ataque sobre o mesmo ");
+         mostraposicao();
+      case 3:
+         // Se ataque do inimigo for Corpo a Corpo, então...;
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         System.out.println(" O "+tipoinimigo[randTipoInimigo]+" recebeu um ataque de água e escorregou, você foi vitorioso ");        
+         mostraposicao();
+         case 7:
+         // Se ataque do inimigo for Faca, então...;
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         System.out.println(" O "+tipoinimigo[randTipoInimigo]+" recebeu um ataque de água e escorregou, você foi vitorioso ");        
+         mostraposicao();
+
+      default:
+
+         for (int i = 0; i < 15; ++i) System.out.println ();
+         System.out.println("Essa bugiganga não defendeu o ataque inimigo, você foi derrotado!");
+         for (int i = 0; i < 15; ++i) System.out.println ();
+         menu();
+      }
+      
+   }
+      else{
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println("Digite um item disponível da lista");
+      System.out.println();
+      mostraposicao();
+      comandoataque();
+   }
+case 3:
+   if (inventario[2]>0) {
+
+      switch (randInimigoAtaque) {
+      case 2:
+         // Se ataque do inimigo for Onda Sonora, então...
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         System.out.println(" Seu abafador Sonoro anulou o ataque inimigo\n e você o atacou sucessivamente em seguida ");
+         mostraposicao();
+
+      default:
+      
+         for (int i = 0; i < 15; ++i) System.out.println ();
+         System.out.println("Essa bugiganga não defendeu o ataque inimigo, você foi derrotado!");
+         for (int i = 0; i < 15; ++i) System.out.println ();
+         menu();
+         
+      }
+   }
+      else{
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println("Digite um item disponível da lista");
+      System.out.println();
+      mostraposicao();
+      comandoataque();
+   }
+case 4:
+   if (inventario[3]>0) {
+      switch (randInimigoAtaque) {
+      case 0:
+         // Se ataque do inimigo for Pistola, então...;;
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[3] = inventario[3]-1;         
+         System.out.println(" seu Chapéu Bugiganga defendeu o ataque com um escudo,\n e você o atacou devidamente ");
+         mostraposicao();
+      case 1:
+         // Se ataque do inimigo for Lança-Chamas, então...;;
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[3] = inventario[3]-1;         
+         System.out.println(" do Chapéu Bugiganga saiu uma arma gigante de água \n que afogou o "+tipoinimigo[randTipoInimigo]+" e atenuou sua munição de fogo  ");         
+         mostraposicao();
+      case 2:
+         // Se ataque do inimigo for Onda Sonora, então...;;
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[3] = inventario[3]-1;         
+         System.out.println(" Do seu incrível Chapéu Bugiganga saiu um abafador\n de som hibrído, o qual também emitiu um som de altíssima intensidade e derrotou o "+tipoinimigo[randTipoInimigo]);         
+         mostraposicao();
+      case 3:
+         // Se ataque do inimigo for Corpo a Corpo, então...;;
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[3] = inventario[3]-1;
+         System.out.println(" Você acaba de gerar uma luva de Boxe robótica em \n tamanho Grande, e acerta um belo Uppercut no seu opontente "+tipoinimigo[randTipoInimigo]);
+         mostraposicao();
+      case 4:
+         // Se ataque do inimigo for Lanterna, então...;;
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[3] = inventario[3]-1;         
+         System.out.println(" Seu Chapéu Lançou uma lente escura sobre seu rosto \nrapidamente, e você enxergou o "+tipoinimigo[randTipoInimigo]+" atacando-o em seguida ");         
+         mostraposicao();
+      case 5:
+         // Se ataque do inimigo for Ataque Helicóptero, então...
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[3] = inventario[3]-1;         
+         System.out.println(" Acabas de utilizar uma Bazooka de seu Chapéu Bugiganga \n contra o Helicóptero do "+tipoinimigo[randTipoInimigo]+" sobrevoando,\n já pode seguir sua jornada sem o incômodo dele ");         
+         mostraposicao();
+      case 6:
+         // Se ataque do inimigo for Raio Ultra-violeta, então...
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[3] = inventario[3]-1;         
+         System.out.println(" Seu Chapéu Bugiganga refletiu os raios ultravioleta \n com uma lente gerada pela tecnologia do chapéu,\n logo o "+tipoinimigo[randTipoInimigo]+" ficou torrado no chão");         
+         mostraposicao();
+      case 7:
+         // Se ataque do inimigo for Faca, então...;
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[3] = inventario[3]-1;         
+         System.out.println(" Você lançou um chiclete ultra-gosmento contra o "+tipoinimigo[randTipoInimigo]+" usando a \n tecnologia Bugiganga, ele ficou preso antes de lhe atacar, siga sua jornada");         
+         mostraposicao();
+
+      default:
+
+         for (int i = 0; i < 15; ++i) System.out.println();
+         System.out.println("Essa bugiganga não defendeu o ataque inimigo, você foi derrotado!");
+         for (int i = 0; i < 15; ++i) System.out.println ();
+         menu();
+      }
+   }
+else{
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println("Digite um item disponível da lista");
+      System.out.println();
+      mostraposicao();
+      comandoataque();
+   }
+case 5:
+   if (inventario[4]>0) {
+
+      switch (randInimigoAtaque) { // Se ataque do inimigo for Lanterna, então...
+      case 4:
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[4] = inventario[4]-1;         
+         System.out.println(" Você se protegeu com os Óculos Escuros da luz emitida pela Lanterna do "+tipoinimigo[randTipoInimigo]+" logo você o derrotou em seguida");
+         mostraposicao();
+
+      default:
+
+         for (int i = 0; i < 15; ++i) System.out.println ();
+         System.out.println(" Você não se defendeu do ataque ultra-violeta do "+tipoinimigo[randTipoInimigo]);       
+        
+         menu();
+      }
+   }
+      else{
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println("Digite um item disponível da lista");
+      System.out.println();
+      mostraposicao();
+      comandoataque();
+   }
+case 6:
+   if (inventario[5]>0) {
+
+      if (randInimigoAtaque==6) { // Se ataque do inimigo for Utra-violeta, então...
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }
+         inventario[5] = inventario[5]-1;         
+         System.out.println(" Você se defendeu dos raios ultravioleta do "+tipoinimigo[randTipoInimigo]+" e refletiu com a Lente de Sua Lupa, devolvendo o ataque");
+         mostraposicao();
+   }
+         else{
+;
+         for (int i = 0; i < 15; ++i) System.out.println ();
+         System.out.println("Essa bugiganga não defendeu o ataque inimigo, você foi derrotado!");
+         for (int i = 0; i < 15; ++i) System.out.println ();
+         menu();
+      }
+   }
+   else{
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println("Digite um item disponível da lista");
+      System.out.println();
+      mostraposicao();
+      comandoataque();
+   }
+case 7:
+   if (inventario[6]>0) {
+
+      if (randInimigoAtaque==0) { // Se ataque do inimigo for Pistola, então...
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+         else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         mudainimigo();
+         }         
+         System.out.println(" O "+tipoinimigo[randTipoInimigo]+" foi cegado com sua Lanterna e não lhe acertou o disparo, você venceu a batalha");
+         mostraposicao();}
+         else{
+
+         for (int i = 0; i < 15; ++i) System.out.println();
+         System.out.println("Essa bugiganga não defendeu o ataque inimigo, você foi derrotado!");
+         for (int i = 0; i < 15; ++i) System.out.println();
+        
+         menu();
+      }
+   }
+      else{
+      for (int i = 0; i < 15; ++i) System.out.println();
+      System.out.println("Digite um item disponível da lista");
+      System.out.println();
+      mostraposicao();
+      comandoataque();
+   }
+case 8:
+   if (inventario[7]>0) {
+
+      switch (randInimigoAtaque) {
+      case 3:
+         // Se ataque do inimigo for Corpo a Corpo, então...
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         }
+         inventario[7] = inventario[7]-1;         
+         System.out.println(" Você utilizou sua Pistola contra o "+tipoinimigo[randTipoInimigo]+",\n menos um criminoso na cidade");         
+         mostraposicao();
+         
+      case 7:
+         // Se ataque do inimigo for Faca, então...
+         if (posicao[0] != 1) {
+         zona[posicao[0]][posicao[1]] = 0;}
+else{
+         vidaGarra = vidaGarra - 1;
+         zona[posicao[0]][posicao[1]] = zona[posicao[0]][posicao[1]] - 1;
+         }         
+         System.out.println(" Você utilizou sua Pistola contra o "+tipoinimigo[randTipoInimigo]+",\n menos um criminoso na cidade");                
+         mostraposicao();
+
+      default:
+
+         for (int i = 0; i < 15; ++i) System.out.println ();
+         System.out.println("Essa bugiganga não defendeu o ataque inimigo, você foi derrotado!");
+         for (int i = 0; i < 15; ++i) System.out.println ();
+        
+         menu();
+break;
+      }
+   }
+else{
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println("Digite um item disponível da lista");
+      System.out.println();
+      mostraposicao();
+      comandoataque();
+   }
+
+default:
+
+   for (int i = 0; i < 15; ++i) System.out.println ();
+   System.out.println("Digite um item disponível da lista");
+   System.out.println();
+   mostraposicao();
+   comandoataque();
+break;
+}
+
+}
+
+static void comandoposicao() {     // Exibe os comandos de Navegação
+
+int opcaoPosicao = 0;
+
+if (zonaitem[posicao[0]][posicao[1]]==1) { //Checa se há um item no local
+   System.out.println();
+   System.out.println("(5) Analisar Ambiente");
+}
+System.out.println();
+if (posicao[0]>1) {
+   System.out.println("(1) Ir Para Frente");
+}
+if (posicao[1]>1) {
+   System.out.println("(2) Ir Para Esquerda");
+}
+if (posicao[1]<5) {
+   System.out.println("(3) Ir Para Direita");
+}
+if (posicao[0]<6) {
+   System.out.println("(4) Ir Para Trás");
+}
+System.out.println();
+System.out.println();
+
+if (vidaGarra != 0) {
+    System.out.print("Comando: ");
+    opcaoPosicao = leia.nextInt();
+}
+else{
+sair();
+}
+switch (opcaoPosicao) {
+case 1:
+   if (posicao[0]>1) {
+      posicao[0] = posicao[0]-1;      
+      mudainimigo();
+      mostraposicao();
+}
+else{
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println(" Você não pode ir para Frente!");
+      System.out.println();
+      mostraposicao();
+      comandoposicao();
+   }
+   break;
+case 2:
+   if (posicao[1]>1) {
+      posicao[1] = posicao[1]-1;      
+      mudainimigo();
+      mostraposicao();
+}
+else{
+      for (int i = 0; i < 15; ++i) System.out.println();
+      System.out.println(" Você não pode ir para Esquerda!");
+      System.out.println();
+      mostraposicao();
+      comandoposicao();
+   }
+   break;
+case 3:
+   if (posicao[1]<5) {
+      posicao[1] = posicao[1]+1;      
+      mudainimigo();
+      mostraposicao();
+}
+else{
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println(" Você não pode ir para Direita!");
+      System.out.println();
+      mostraposicao();
+      comandoposicao();
+   }
+   break;
+case 4:
+   if (posicao[0]<6) {
+      posicao[0] = posicao[0]+1;      
+      mudainimigo();
+      mostraposicao();
+}
+else{
+      for (int i = 0; i < 15; ++i) System.out.println ();
+      System.out.println(" Você não pode ir para Trás!");
+      System.out.println();
+      mostraposicao();
+      comandoposicao();
+   }
+   break;
+
+case 5:
+   if (zonaitem[posicao[0]][posicao[1]]==1) {
+
+      inventario[randItem+4]=inventario[randItem+4]+1;
+      zonaitem[posicao[0]][posicao[1]] = 0;      
+      System.out.println();
+      System.out.println(mapaitem[randItem+5]);
+
+      switch (randItem+4) {
+
+      case 4:
+         
+         System.out.println("                   ________     ________");;
+         System.out.println("             . - ~|        |-^-|        |~ - .");
+         System.out.println("           {      |        |   |        |      }");
+         System.out.println("            \\)    \\            *        |");
+         System.out.println("                   `.____.'     `.____.'");
+         mostraposicao();
+         comandoposicao();
+         
+break;
+      case 5:
+
+         System.out.println("                           ______              ");
+         System.out.println("                        .-'      `-.           ");
+         System.out.println("                      .'            `.         ");
+         System.out.println("                     /                \\        ");
+         System.out.println("                    |                 |        ");
+         System.out.println("                                     ;|        ");
+         System.out.println("                    \\               / ;        ");
+         System.out.println("                     \\`.           .' /        ");
+         System.out.println("                      `.`-._____.-' .'         ");
+         System.out.println("                        / /`_____.-'           ");
+         System.out.println("                       / / /                   ");
+         System.out.println("                      / / /                    ");
+         System.out.println("                     / / /                     ");
+         System.out.println("                     \\/_/                      ");
+         mostraposicao();
+         comandoposicao();
+
+break;
+      case 6:
+         
+         System.out.println("                                  _.----.   /");
+         System.out.println("                .----------------' /  /  \\   _");
+         System.out.println("               (     BUGIGANGA  | |   |) |   _");
+         System.out.println("                `----------------._\\  \\  /   _ ");
+         System.out.println("                                   '----'   \\") ;
+         mostraposicao();
+         comandoposicao();
+
+break;
+      case 7:
+         
+         System.out.println("                ___________________________________,");
+         System.out.println("            ___/  ////////  \\____/                 |");
+         System.out.println("           <__ |_////////__________________________|");
+         System.out.println("             \\)                 *        |________|");
+         System.out.println("              /        __________________|");
+         System.out.println("             /        /  ||   //");
+         System.out.println("            /        /____\\__//");
+         System.out.println("           /        /~~~~~~~~~");
+         System.out.println("          /        /");
+         System.out.println("          \\-------/");           
+      mostraposicao();
+      comandoposicao();
+break;
+
+}
+   }
+   
+   else {
+   System.out.println();
+   System.out.println("Direção inválida!");
+   mostraposicao();
+   }
+   }
+}
+
+// 1 - Colete a Prova de Balas
+// 2 - Jato de água
+// 3 - Abafadores Sonoros
+// 4 - Chapéu Bugiganga
+// 5 - Óculos Escuro
+// 6 - Lupa
+// 7 - Lanterna
+// 8 - Pistola
+
+// Vidas, Inventário, Andar pelo Cenário com Narrativa
+// Interação com Objetos
+
+public static void main(String[]args) {
+
+System.out.println("                                             .???. ");
+System.out.println("                                     .?.       ?.?#??.");
+System.out.println("                                 ...???.      .??????.");
+System.out.println("                       ..??????????????????????77?7??..");
+System.out.println("                    .??????777777?77????????7!???7J???");
+System.out.println("                  .??(7?????????????????????????7#???!");
+System.out.println("                 .?7@????????????????????????7777777??.");
+System.out.println("              .???@77#????????7??....??????????(7????.");
+System.out.println("            .??77??????????????.     .??????????7??57");
+System.out.println("        ..%??#77????????????7?.       .??????7??%??3  1");
+System.out.println("     .?????*   ?(?????????7?  ??? ?!  .??????=  .?????????");
+System.out.println("   .????.        ??77????7? ??????      .????    777777? ? ");
+System.out.println("  .???   ?????5.  ???!???????! 777?   ?(??    .   7 7??*7. ??.");
+System.out.println("  ???.  ?777?????..??7??7?  ?77#????  ??@77. .?   ?77 ??,?");
+System.out.println(" (???    7  777.777.777777  7  . ???  ? ??? ???   77 ??.?A");
+System.out.println("??.???         77???.???7?  7   .777777777 77777.7  ??.?");
+System.out.println(" ???.???..      7777 77777777  7   .???????#?????%??? ??.?");
+System.out.println(" A?????..???.  777. 7777777     7.?5???.  ???   ??.????.");
+System.out.println("    ???????7??. 773?????7?7?     7777.7  7?@???      .???");
+System.out.println("       ??.???7?? ? 5?C???(???.              777       . ?.");
+System.out.println("        ?7777777777?7???7?7?777                        ..??.");
+System.out.println("        ??.?7?77???77777??7?7777                       ..$?...");
+System.out.println("         .????7????77?77577?7?A???????7                .???????.");
+System.out.println("         ??.?77@?7??7??777??$?1       77??7         ??..    ??.");
+System.out.println("        ?..??.??7????777777777            777777777.. .7 77777");
+System.out.println("          ???7777..7.77777?77777                    7? ?????5");
+System.out.println("        ????..???????????????????J           777???? ???(???");
+System.out.println("           ???????????..........??? ?77???????????? ???(???");
+System.out.println("                     ????????????.3???           ?????.?");
+System.out.println("                              ?????5.??????????????..??");
+System.out.println("                                    ??????????????????");
+System.out.println("                                   ????????????????");
+System.out.println();
+System.out.println("                      TeamPanzé Apresenta:");    
+    
+menu(); 
+   
+}
+
+}
